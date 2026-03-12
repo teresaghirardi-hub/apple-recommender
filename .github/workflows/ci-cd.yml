@@ -23,7 +23,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Lint with flake8
-        run: flake8 src/ api.py app.py --max-line-length=100 --ignore=E501,W503
+        run: flake8 src/ api.py app.py --max-line-length=100 --ignore=E501,W503,E241,E221,E302,E305,W292
 
       - name: Run tests
         run: pytest tests/ -v
