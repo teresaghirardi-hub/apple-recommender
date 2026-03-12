@@ -1,0 +1,19 @@
+# Data & models (too large for git)
+data/
+models/
+reports/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets
+.env
+
+# MLflow
+mlruns/
+
+# OS
+.DS_Store
