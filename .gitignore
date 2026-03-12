@@ -1,7 +1,9 @@
-# Data & models (too large for git)
-data/
+# Models (generated at build time)
 models/
 reports/
+
+# Keep data/ tracked but ignore reference.csv (generated at training)
+data/reference.csv
 
 # Python
 __pycache__/
