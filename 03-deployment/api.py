@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from src.predict import load_pipeline, predict_segment
+from predict import load_pipeline, predict_segment
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
