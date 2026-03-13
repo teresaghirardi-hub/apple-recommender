@@ -90,3 +90,4 @@ with col2:
     st.caption("Confidence scores")
     for seg, prob in sorted(proba.items(), key=lambda x: -x[1]):
         st.progress(prob, text=f"{seg}: {prob:.0%}")
+
