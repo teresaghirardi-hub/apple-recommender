@@ -6,7 +6,7 @@ Run:
 """
 
 import streamlit as st
-from src.predict import load_pipeline, predict_segment
+from predict import load_pipeline, predict_segment
 
 st.set_page_config(
     page_title="Apple – Personalised Homepage",
