@@ -31,25 +31,25 @@ def make_mock_pipeline(segment="Individual"):
 
 
 def test_predict_returns_valid_segment():
-    from src.predict import predict_segment
+    from predict import predict_segment
     result = predict_segment(make_mock_pipeline(), SAMPLE_INPUT)
     assert result["segment"] in VALID_SEGMENTS
 
 
 def test_predict_returns_four_probabilities():
-    from src.predict import predict_segment
+    from predict import predict_segment
     result = predict_segment(make_mock_pipeline(), SAMPLE_INPUT)
     assert len(result["probabilities"]) == 4
 
 
 def test_probabilities_sum_to_one():
-    from src.predict import predict_segment
+    from predict import predict_segment
     result = predict_segment(make_mock_pipeline(), SAMPLE_INPUT)
     assert abs(sum(result["probabilities"].values()) - 1.0) < 0.01
 
 
 def test_predict_returns_content():
-    from src.predict import predict_segment
+    from predict import predict_segment
     result = predict_segment(make_mock_pipeline(), SAMPLE_INPUT)
     assert "headline" in result["content"]
     assert "products" in result["content"]
@@ -57,12 +57,12 @@ def test_predict_returns_content():
 
 
 def test_load_pipeline_raises_if_missing():
-    from src.predict import load_pipeline
+    from predict import load_pipeline
     with pytest.raises(FileNotFoundError):
         load_pipeline("models/nonexistent.pkl")
 
 
 def test_segment_content_covers_all_segments():
-    from src.predict import SEGMENT_CONTENT
+    from predict import SEGMENT_CONTENT
     for segment in VALID_SEGMENTS:
         assert segment in SEGMENT_CONTENT

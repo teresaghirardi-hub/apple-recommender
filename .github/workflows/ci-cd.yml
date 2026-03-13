@@ -26,7 +26,7 @@ jobs:
         run: flake8 03-deployment/ 02-experiment-tracking/ --max-line-length=100 --ignore=E501,W503,E241,E221,E302,E305,W292,W391,E272
 
       - name: Run unit tests
-        run: pytest 03-deployment/test_api.py -v
+        run: pytest 03-deployment/test_api.py -v --import-mode=importlib
 
   build:
     needs: lint-test
