@@ -7,8 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python src/train.py
+RUN python 02-experiment-tracking/train.py
 
 EXPOSE 8000
 
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "03-deployment.api:app", "--host", "0.0.0.0", "--port", "8000"]
