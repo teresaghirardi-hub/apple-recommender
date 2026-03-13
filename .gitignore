@@ -1,6 +1,5 @@
 # Models (generated at build time)
 models/
-reports/
 mlruns/
 
 # Keep data/ tracked but ignore reference.csv (generated at training)
