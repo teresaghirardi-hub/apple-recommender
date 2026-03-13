@@ -10,14 +10,16 @@ import argparse
 import logging
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 import yaml
-
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset
-from evidently.metrics import DatasetDriftMetric
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
+
+FEATURE_COLS = [
+    'product_name', 'category', 'color',
+    'customer_age_group', 'region', 'country', 'city'
+]
 
 
 def load_config(path="config.yaml"):
@@ -25,41 +27,48 @@ def load_config(path="config.yaml"):
         return yaml.safe_load(f)
 
 
-def run_drift_report(reference_path, current_path, output_path):
-    logger.info(f"Loading reference data from {reference_path}")
-    reference = pd.read_csv(reference_path)
+def run_drift_report(current_path, output_path):
+    logger.info("Loading reference data from raw dataset")
+    reference = pd.read_csv('data/apple_sales.csv')[FEATURE_COLS]
 
     logger.info(f"Loading current data from {current_path}")
-    current = pd.read_csv(current_path)
+    current = pd.read_csv(current_path)[FEATURE_COLS]
 
-    report = Report(metrics=[
-        DataDriftPreset(),
-        DatasetDriftMetric(),
-    ])
-    report.run(reference_data=reference, current_data=current)
+    logger.info(f"Reference: {len(reference):,} rows | Current: {len(current):,} rows")
+
+    fig, axes = plt.subplots(len(FEATURE_COLS), 2, figsize=(14, len(FEATURE_COLS) * 3))
+
+    for i, col in enumerate(FEATURE_COLS):
+        ref_counts = reference[col].value_counts(normalize=True).head(10)
+        cur_counts = current[col].value_counts(normalize=True).head(10)
+
+        ref_counts.plot(kind='bar', ax=axes[i][0], color='#0071e3', alpha=0.7)
+        cur_counts.plot(kind='bar', ax=axes[i][1], color='#34c759', alpha=0.7)
+
+        axes[i][0].set_title(f'{col} — Reference', fontsize=10)
+        axes[i][1].set_title(f'{col} — Current', fontsize=10)
+        axes[i][0].tick_params(axis='x', rotation=30)
+        axes[i][1].tick_params(axis='x', rotation=30)
+
+    plt.suptitle('Drift Monitoring Report — Reference vs Current',
+                 fontsize=14, fontweight='bold', y=1.01)
+    plt.tight_layout()
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    report.save_html(output_path)
-    logger.info(f"Drift report saved to {output_path}")
-
-    drift_detected = report.as_dict()["metrics"][1]["result"]["dataset_drift"]
-    if drift_detected:
-        logger.warning("DRIFT DETECTED - consider retraining the model.")
-    else:
-        logger.info("No significant drift detected.")
-
-    return drift_detected
+    report_path = output_path.replace('.html', '.png')
+    plt.savefig(report_path, dpi=100, bbox_inches='tight')
+    logger.info(f"Drift report saved to {report_path}")
+    plt.show()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--current", required=True, help="Path to current batch CSV")
+    parser.add_argument("--current", required=True)
     parser.add_argument("--config", default="config.yaml")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     run_drift_report(
-        reference_path=cfg["monitoring"]["reference_data_path"],
         current_path=args.current,
         output_path=cfg["monitoring"]["report_output_path"],
     )
