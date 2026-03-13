@@ -1,9 +1,9 @@
 """
-monitor.py - Drift detection using Evidently AI.
+monitor.py - Drift detection using statistical comparison.
 Compares new prediction data against the training reference dataset.
 
 Usage:
-    python src/monitor.py --current data/current_batch.csv
+    python 04-monitoring/monitor.py --current 04-monitoring/data/predictions.csv
 """
 
 import argparse
