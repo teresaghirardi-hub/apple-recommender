@@ -1,6 +1,7 @@
 # Models (generated at build time)
 models/
 reports/
+mlruns/
 
 # Keep data/ tracked but ignore reference.csv (generated at training)
 data/reference.csv
@@ -9,13 +10,9 @@ data/reference.csv
 __pycache__/
 *.py[cod]
 .venv/
-venv/
 
 # Secrets
-.env
-
-# MLflow
-mlruns/
+.envS
 
 # OS
 .DS_Store

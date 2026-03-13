@@ -1,0 +1,32 @@
+# Core ML
+scikit-learn
+pandas
+numpy
+joblib
+category-encoders
+
+# Experiment tracking
+mlflow
+
+# Explainability
+shap
+
+# Monitoring
+evidently
+
+# API
+fastapi
+uvicorn
+pydantic
+
+# UI
+streamlit
+
+# Config
+pyyaml
+python-dotenv
+
+# Testing & linting
+pytest
+httpx
+flake8
