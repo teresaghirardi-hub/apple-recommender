@@ -24,6 +24,9 @@ from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 import category_encoders as ce
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -107,6 +110,10 @@ def train_random_forest(X_train_t, y_train, X_test_t, y_test, cfg):
 
         mlflow.log_params(grid.best_params_)
         mlflow.log_metrics({"accuracy": acc, "f1_weighted": f1})
+        fig, ax = plt.subplots()
+        ConfusionMatrixDisplay.from_predictions(y_test, y_pred, ax=ax)
+        mlflow.log_figure(fig, "confusion_matrix.png")
+        plt.close(fig)
         mlflow.sklearn.log_model(best, artifact_path="random_forest")
 
         logger.info(f"Best RF — Acc: {acc:.4f} | F1: {f1:.4f}")

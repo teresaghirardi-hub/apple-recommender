@@ -144,6 +144,10 @@ if page == "🏠 Homepage":
         result  = predict_segment(pipeline, input_data)
         segment = result["segment"]
         proba   = result["probabilities"]
+        max_prob = max(proba.values())
+        if max_prob < 0.5:
+            st.warning("We couldn't confidently determine your segment. Showing default homepage.")
+            st.stop()
         color_h = SEGMENT_COLORS[segment]
 
         # Hero
