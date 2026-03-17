@@ -69,4 +69,9 @@ uvicorn api:app --reload
 ### 5. Run tests
 ```bash
 pytest tests/
+``
+### 6. Train the revenue model
 ```
+python src/train_revenue.py
+```
+This trains a Random Forest Regressor to predict `revenue_usd` and saves `models/revenue_pipeline.pkl`.

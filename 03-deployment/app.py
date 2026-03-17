@@ -69,6 +69,11 @@ def get_pipeline():
     model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'pipeline.pkl')
     return load_pipeline(model_path)
 
+@st.cache_resource
+def get_revenue_pipeline():
+    from predict_revenue import load_revenue_pipeline
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'revenue_pipeline.pkl')
+    return load_revenue_pipeline(model_path)
 
 @st.cache_data
 def load_data():
@@ -88,7 +93,7 @@ submitted = False
 with st.sidebar:
     st.markdown("## 🍎 Apple Classifier")
     st.markdown("---")
-    page = st.radio("", ["🏠 Homepage", "📊 Analytics", "🤖 Model Info"])
+    page = st.radio("", ["🏠 Homepage", "💰 Revenue Predictor","📊 Analytics", "🤖 Model Info"])
     st.markdown("---")
 
 if page == "🏠 Homepage":   
@@ -115,6 +120,22 @@ if page == "🏠 Homepage":
 
     st.markdown("---")
     submitted = st.button("✦ Show my homepage", use_container_width=True)
+
+elif page == "💰 Revenue Predictor":
+    st.markdown("##### Sales scenario")
+    rev_product     = st.selectbox("Product", ["iPhone 15", "iPhone 15 Pro", "MacBook Air", "MacBook Pro", "iPad Pro", "iPad", "Apple Watch Series 9", "AirPods Pro", "Mac mini", "iMac"], key="rev_prod")
+    rev_category    = st.selectbox("Category", ["iPhone", "Mac", "iPad", "Apple Watch", "AirPods", "Accessories"], key="rev_cat")
+    rev_color       = st.selectbox("Color", ["Black", "White", "Silver", "Gold", "Space Gray", "Midnight", "Starlight"], key="rev_col")
+    rev_age         = st.selectbox("Age group", ["18–24", "25–34", "35–44", "45–54", "55+"], key="rev_age")
+    rev_region      = st.selectbox("Region", ["North America", "Europe", "Asia", "South America", "Oceania", "Africa", "Middle East"], key="rev_reg")
+    rev_country     = st.text_input("Country", value="United States", key="rev_country")
+    rev_city        = st.text_input("City", value="New York", key="rev_city")
+    rev_channel     = st.selectbox("Sales channel", ["Online", "Retail", "Reseller", "B2B"], key="rev_chan")
+    rev_payment     = st.selectbox("Payment method", ["Credit Card", "Debit Card", "PayPal", "Bank Transfer", "Apple Pay"], key="rev_pay")
+    rev_discount    = st.slider("Discount %", 0.0, 50.0, 10.0, step=0.5, key="rev_disc")
+    rev_units       = st.number_input("Units sold", min_value=1, max_value=100, value=1, key="rev_units")
+    st.markdown("---")
+    rev_submitted   = st.button("💰 Predict Revenue", use_container_width=True)
 
 
 # ── PAGE 1: Homepage ───────────────────────────────────────────────────────────
@@ -196,6 +217,75 @@ if page == "🏠 Homepage":
     except Exception as e:
         st.error(f"Error: {e}")
         st.info("Make sure you ran `python 02-experiment-tracking/train.py` from the root first.")
+
+elif page == "💰 Revenue Predictor":
+    st.markdown("## 💰 Revenue Predictor")
+    st.caption("Estimate expected revenue for a given customer and sales scenario")
+
+    if not rev_submitted:
+        st.markdown("""
+        <div style="background:#f8f9fa;border-radius:20px;padding:3rem;text-align:center;">
+            <div style="font-size:4rem">💰</div>
+            <h2 style="color:#667eea;">Revenue Predictor</h2>
+            <p style="color:#888;">Configure a sales scenario on the left and click <b>Predict Revenue</b></p>
+            <p style="color:#aaa;font-size:0.9rem;">This model estimates expected revenue based on product, customer profile, channel, discount, and units sold.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.stop()
+
+    try:
+        rev_pipeline = get_revenue_pipeline()
+        from predict_revenue import predict_revenue
+
+        input_data = {
+            "product_name":        rev_product,
+            "category":            rev_category,
+            "color":               rev_color,
+            "customer_age_group":  rev_age,
+            "region":              rev_region,
+            "country":             rev_country,
+            "city":                rev_city,
+            "sales_channel":       rev_channel,
+            "payment_method":      rev_payment,
+            "discount_pct":        rev_discount,
+            "units_sold":          rev_units,
+        }
+
+        result        = predict_revenue(rev_pipeline, input_data)
+        predicted_rev = result["revenue_usd"]
+
+        # Hero card
+        st.markdown(f"""
+        <div style="background:linear-gradient(135deg,#667eeacc,#764ba2aa);
+                    border-radius:20px;padding:2.5rem;color:white;margin-bottom:1.5rem;">
+            <div style="font-size:3rem">💰</div>
+            <h1 style="font-size:2.8rem;font-weight:800;margin:0.5rem 0;color:white;">
+                ${predicted_rev:,.2f}
+            </h1>
+            <p style="font-size:1.1rem;opacity:0.9;margin:0">Predicted Revenue (USD)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown("#### 📋 Scenario Summary")
+            st.markdown(f"**Product:** {rev_product}  \n**Category:** {rev_category}  \n**Channel:** {rev_channel}  \n**Payment:** {rev_payment}  \n**Units:** {rev_units}  \n**Discount:** {rev_discount}%")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with col2:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown("#### 📊 Revenue Breakdown")
+            per_unit = predicted_rev / rev_units if rev_units > 0 else 0
+            st.metric("Total Predicted Revenue", f"${predicted_rev:,.2f}")
+            st.metric("Revenue per Unit", f"${per_unit:,.2f}")
+            st.metric("Discount Applied", f"{rev_discount}%")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"Error: {e}")
+        st.info("Make sure you ran `python src/train_revenue.py` from the root first.")
 
 
 # ── PAGE 2: Analytics ──────────────────────────────────────────────────────────
@@ -334,3 +424,15 @@ elif page == "🤖 Model Info":
             <p>☁️ <b>Render</b> — cloud deployment</p>
         </div>
         """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="card">
+            <h4>💰 Revenue Predictor</h4>
+            <p><b>Model:</b> Random Forest Regressor</p>
+            <p><b>Target:</b> revenue_usd</p>
+            <p><b>Extra features vs classifier:</b> sales_channel, payment_method, discount_pct, units_sold</p>
+            <p><b>Metrics:</b> MAE, RMSE, R²</p>
+            <p><b>Use case:</b> Estimate customer lifetime value and optimize pricing/promotions</p>
+        </div>
+        """, unsafe_allow_html=True)
+            
