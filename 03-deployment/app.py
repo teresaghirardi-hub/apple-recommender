@@ -93,7 +93,7 @@ submitted = False
 with st.sidebar:
     st.markdown("## 🍎 Apple Classifier")
     st.markdown("---")
-    page = st.radio("", ["🏠 Homepage", "💰 Revenue Predictor","📊 Analytics", "🤖 Model Info"])
+    page = st.radio("", ["🏠 Homepage","💰Revenue Predictor","📊 Analytics","🤖 Model Info"])
     st.markdown("---")
 
 if page == "🏠 Homepage":   
